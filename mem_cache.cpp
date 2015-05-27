@@ -3,9 +3,15 @@
 #include <fstream>
 #include <string>
 
+#define WT 0
+#define WB 1
+#define LRU 0
+#define RAND 1
+
+
 struct SCache {
-	int rotulo;
-	int dirtybit;
+	int rotulo = -1;
+	int dirtybit = -1;
 };
 
 using namespace std;
@@ -25,7 +31,7 @@ int main()
 	cin >> numeroBlocosConjunto;
 
 	int politicaEscrita;
-	cout << "Politica de escrita (1 - write-back, 0 - write-through): ";
+	cout << "Politica de escrita (0 - write-through, 1 - write-back): ";
 	cin >> politicaEscrita;
 
 	int tempoLeitura;
@@ -37,8 +43,12 @@ int main()
 	cin >> tempoEscrita;
 
 	int tempoAcesso;
-	cout << "Tempo de acesso (em ns): ";
+	cout << "Tempo de acesso cache (em ns): ";
 	cin >> tempoAcesso;
+
+	int tempoAcessoMem;
+	cout << "Tempo de acesso MEM (em ns): ";
+	cin >> tempoAcessoMem;
 
 	int politicaSubstituicao;
 	cout << "Politica de substituicao (0 - LRU , 1 - aleatoria): ";
@@ -48,20 +58,22 @@ int main()
 	int numeroConjuntos = tamanhoCache / (numeroBlocosConjunto * tamanhoBloco);
 
 	vector<vector<SCache>> cache(numeroConjuntos, vector<SCache>(numeroBlocosConjunto));
-	vector<vector<int>> ordemLRU(numeroConjuntos, vector<int>(numeroBlocosConjunto));
+	vector<vector<int>> ordemLRU(numeroConjuntos, vector<int>(numeroBlocosConjunto, -1));
 
 	int endereco, verificacoes = 0, acertos = 0, erros = 0, enderecosEscrita = 0,
 		leiturasMemoria = 0, escritasMemoria = 0;
 	char tipoLeituraEscrita;
 
-	//ifstream arq("C:\\Users\\W7\\Source\\Repos\\SimuladorMemCache\\SimuladorMemCache\\Debug\\teste.cache");
-	ifstream arq("teste.cache");
+	ifstream arq("C:\\Users\\W7\\Source\\Repos\\SimuladorMemCache\\SimuladorMemCache\\Debug\\teste.cache");
+	//ifstream arq("teste.cache");
+
+	int conjunto;
 	while (arq >> hex >> endereco >> tipoLeituraEscrita)
 	{
 		if (tipoLeituraEscrita == 'W')
 			enderecosEscrita++;
 		verificacoes++;
-		int conjunto = (endereco / tamanhoBloco) % numeroConjuntos;
+		conjunto = (endereco / tamanhoBloco) % numeroConjuntos;
 		int rotulo = endereco / (tamanhoBloco * numeroConjuntos);
 		size_t i = 0;
 		while (i < numeroBlocosConjunto && cache[conjunto][i].rotulo != rotulo)
@@ -70,9 +82,19 @@ int main()
 		if (i < numeroBlocosConjunto && cache[conjunto][i].rotulo == rotulo)
 		{
 			acertos++;
+			if (politicaSubstituicao == LRU)
+			{
+				struct SCache tmp = cache[conjunto][i];
+				for (int j = i; j > 0; j--)
+				{
+					cache[conjunto][j] = cache[conjunto][j - 1];
+				}
+				i = 0;
+				cache[conjunto][i] = tmp;
+			}
 			if (tipoLeituraEscrita == 'W')
 			{
-				if (politicaEscrita == 0) // write through
+				if (politicaEscrita == WT) // write through
 				{
 					// escreve na memoria
 					escritasMemoria++;
@@ -86,30 +108,65 @@ int main()
 		else
 		{
 			erros++;
-			if (cache[conjunto][i].dirtybit == 1) 
+			int id;
+			if (cache[conjunto][0].rotulo < 0)
+			{
+				id = numeroBlocosConjunto - 1;
+				while (cache[conjunto][id].rotulo >= 0)
+				{
+					id--;
+				}
+			}
+			else if (politicaSubstituicao == RAND)
+			{
+				id = rand() % numeroBlocosConjunto;
+				if (cache[conjunto][id].dirtybit == 1)
+				{
+					escritasMemoria++;
+				}
+			}
+			else
+			{
+				id = 0;
+				if (cache[conjunto][numeroBlocosConjunto - 1].dirtybit == 1)
+				{
+					escritasMemoria++;
+				}
+				for (i = numeroBlocosConjunto - 1; i > 0; i--)
+				{
+					cache[conjunto][i] = cache[conjunto][i - 1];
+				}
+			}
+			cache[conjunto][id].rotulo = rotulo;
+
+			// total de leituras da memoria
+			leiturasMemoria++;
+
+			if (politicaEscrita == WT && tipoLeituraEscrita == 'W')
 			{
 				escritasMemoria++;
 			}
-			int id;
-			if (!cache[conjunto][numeroBlocosConjunto].rotulo) {
-//				id = cache[conjunto].size - 1;
-			} 
-			else if (politicaSubstituicao == 1)
+			else if (politicaEscrita == WB)
 			{
-				id = rand() % numeroBlocosConjunto;
+				cache[conjunto][id].dirtybit = tipoLeituraEscrita == 'W';
 			}
-			else 
-			{
-				//LRU
-			}
-			cache[conjunto][id].rotulo = rotulo;
-			cache[conjunto][id].dirtybit = 0;
-			// total de leituras da memoria
-			leiturasMemoria++;
 		}
 	}
 
-	ofstream res("res.txt");
+	if (politicaEscrita == WB) 
+	{
+		for (int i = 0; i < numeroBlocosConjunto; i++)
+		{
+			if (cache[conjunto][i].dirtybit == 1)
+			{
+				escritasMemoria++;
+			}
+		}
+	}
+
+	ofstream res("C:\\Users\\W7\\Source\\Repos\\SimuladorMemCache\\SimuladorMemCache\\Debug\\res.txt");
+	//ofstream res("res.txt");
+	double taxaAcerto = double(acertos) / double(verificacoes);
 	res
 		<< "Parametros de entrada: " << endl
 		<< "Tamanho do bloco " << tamanhoBloco << endl
@@ -128,13 +185,15 @@ int main()
 
 		// Taxa de acerto (hit rate): especificar esta taxa por leitura, escrita e global (colocar ao lado a quantidade);
 
-		<< "Taxa de acerto (hit rate): " << double(acertos)/double(verificacoes) << endl
+		<< "Taxa de acerto (hit rate): " << taxaAcerto * 100 << "%" << endl
 
 		// Tempo médio de acesso da cache (em ns): utilizar a fórmula vista em aula;
 
+		<< "Tempo médio de acesso: " << taxaAcerto * tempoAcesso + (1 - taxaAcerto) * (tempoAcesso + tempoAcessoMem) << endl
+
 		//<< "Numero de acertos: " << acertos << endl
 		//<< "Numero de erros: " << erros << endl
-	;
+		;
 
 	return 0;
 }
