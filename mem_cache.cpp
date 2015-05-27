@@ -132,7 +132,7 @@ int main()
 				{
 					escritasMemoria++;
 				}
-				for (i = numeroBlocosConjunto - 1; i > 0; i--)
+				for (size_t i = numeroBlocosConjunto - 1; i > 0; i--)
 				{
 					cache[conjunto][i] = cache[conjunto][i - 1];
 				}
@@ -148,14 +148,14 @@ int main()
 			}
 			else if (politicaEscrita == WB)
 			{
-				cache[conjunto][id].dirtybit = tipoLeituraEscrita == 'W';
+				cache[conjunto][id].dirtybit = (tipoLeituraEscrita == 'W');
 			}
 		}
 	}
 
 	if (politicaEscrita == WB) 
 	{
-		for (int i = 0; i < numeroBlocosConjunto; i++)
+		for (size_t i = 0; i < numeroBlocosConjunto; i++)
 		{
 			if (cache[conjunto][i].dirtybit == 1)
 			{
