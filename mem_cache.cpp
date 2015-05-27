@@ -8,8 +8,8 @@
 #define LRU 0
 #define RAND 1
 
-
-struct SCache {
+struct SCache 
+{
 	int rotulo = -1;
 	int dirtybit = -1;
 };
@@ -62,8 +62,8 @@ int main()
 		leiturasMemoria = 0, escritasMemoria = 0;
 	char tipoLeituraEscrita;
 
-	std::ifstream arq("C:\\Users\\W7\\Source\\Repos\\SimuladorMemCache\\SimuladorMemCache\\Debug\\teste.cache");
-	//std::ifstream arq("teste.cache");
+	//std::ifstream arq("C:\\Users\\W7\\Source\\Repos\\SimuladorMemCache\\SimuladorMemCache\\Debug\\teste.cache");
+	std::ifstream arq("teste.cache");
 
 	int conjunto;
 	while (arq >> std::hex >> endereco >> tipoLeituraEscrita)
@@ -150,6 +150,12 @@ int main()
 			}
 		}
 	}
+	
+	if(verificacoes == 0) 
+	{
+		std::cout << "Erro ao abrir arquivo da cache." << std::endl;
+		return -1;
+	}
 
 	if (politicaEscrita == WB) 
 	{
@@ -162,8 +168,9 @@ int main()
 		}
 	}
 
-	std::ofstream res("C:\\Users\\W7\\Source\\Repos\\SimuladorMemCache\\SimuladorMemCache\\Debug\\res.txt");
-	//std::ofstream res("res.txt");
+	//std::ofstream res("C:\\Users\\W7\\Source\\Repos\\SimuladorMemCache\\SimuladorMemCache\\Debug\\res.txt");
+	std::ofstream res("res.txt");
+	
 	double taxaAcerto = double(acertos) / double(verificacoes);
 	res
 		<< "Parametros de entrada: " << std::endl
