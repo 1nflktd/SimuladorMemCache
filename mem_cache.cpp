@@ -14,61 +14,59 @@ struct SCache {
 	int dirtybit = -1;
 };
 
-using namespace std;
-
 int main()
 {
 	int tamanhoBloco;
-	cout << "Tamanho do bloco (potencia de 2, em bytes): ";
-	cin >> tamanhoBloco;
+	std::cout << "Tamanho do bloco (potencia de 2, em bytes): ";
+	std::cin >> tamanhoBloco;
 
 	int numeroBlocos;
-	cout << "Número de blocos (potencia de 2): ";
-	cin >> numeroBlocos;
+	std::cout << "Número de blocos (potencia de 2): ";
+	std::cin >> numeroBlocos;
 
 	int numeroBlocosConjunto;
-	cout << "Número de blocos por conjunto: ";
-	cin >> numeroBlocosConjunto;
+	std::cout << "Número de blocos por conjunto: ";
+	std::cin >> numeroBlocosConjunto;
 
 	int politicaEscrita;
-	cout << "Politica de escrita (0 - write-through, 1 - write-back): ";
-	cin >> politicaEscrita;
+	std::cout << "Politica de escrita (0 - write-through, 1 - write-back): ";
+	std::cin >> politicaEscrita;
 
 	int tempoLeitura;
-	cout << "Tempo de leitura (em ns): ";
-	cin >> tempoLeitura;
+	std::cout << "Tempo de leitura (em ns): ";
+	std::cin >> tempoLeitura;
 
 	int tempoEscrita;
-	cout << "Tempo de escrita (em ns): ";
-	cin >> tempoEscrita;
+	std::cout << "Tempo de escrita (em ns): ";
+	std::cin >> tempoEscrita;
 
 	int tempoAcesso;
-	cout << "Tempo de acesso cache (em ns): ";
-	cin >> tempoAcesso;
+	std::cout << "Tempo de acesso cache (em ns): ";
+	std::cin >> tempoAcesso;
 
 	int tempoAcessoMem;
-	cout << "Tempo de acesso MEM (em ns): ";
-	cin >> tempoAcessoMem;
+	std::cout << "Tempo de acesso MEM (em ns): ";
+	std::cin >> tempoAcessoMem;
 
 	int politicaSubstituicao;
-	cout << "Politica de substituicao (0 - LRU , 1 - aleatoria): ";
-	cin >> politicaSubstituicao;
+	std::cout << "Politica de substituicao (0 - LRU , 1 - aleatoria): ";
+	std::cin >> politicaSubstituicao;
 
 	int tamanhoCache = tamanhoBloco * numeroBlocos;
 	int numeroConjuntos = tamanhoCache / (numeroBlocosConjunto * tamanhoBloco);
 
-	vector<vector<SCache>> cache(numeroConjuntos, vector<SCache>(numeroBlocosConjunto));
-	vector<vector<int>> ordemLRU(numeroConjuntos, vector<int>(numeroBlocosConjunto, -1));
+	std::vector<std::vector<SCache> > cache(numeroConjuntos, std::vector<SCache>(numeroBlocosConjunto));
+	std::vector<std::vector<int> > ordemLRU(numeroConjuntos, std::vector<int>(numeroBlocosConjunto, -1));
 
 	int endereco, verificacoes = 0, acertos = 0, erros = 0, enderecosEscrita = 0,
 		leiturasMemoria = 0, escritasMemoria = 0;
 	char tipoLeituraEscrita;
 
-	ifstream arq("C:\\Users\\W7\\Source\\Repos\\SimuladorMemCache\\SimuladorMemCache\\Debug\\teste.cache");
-	//ifstream arq("teste.cache");
+	std::ifstream arq("C:\\Users\\W7\\Source\\Repos\\SimuladorMemCache\\SimuladorMemCache\\Debug\\teste.cache");
+	//std::ifstream arq("teste.cache");
 
 	int conjunto;
-	while (arq >> hex >> endereco >> tipoLeituraEscrita)
+	while (arq >> std::hex >> endereco >> tipoLeituraEscrita)
 	{
 		if (tipoLeituraEscrita == 'W')
 			enderecosEscrita++;
@@ -164,35 +162,35 @@ int main()
 		}
 	}
 
-	ofstream res("C:\\Users\\W7\\Source\\Repos\\SimuladorMemCache\\SimuladorMemCache\\Debug\\res.txt");
-	//ofstream res("res.txt");
+	std::ofstream res("C:\\Users\\W7\\Source\\Repos\\SimuladorMemCache\\SimuladorMemCache\\Debug\\res.txt");
+	//std::ofstream res("res.txt");
 	double taxaAcerto = double(acertos) / double(verificacoes);
 	res
-		<< "Parametros de entrada: " << endl
-		<< "Tamanho do bloco " << tamanhoBloco << endl
-		<< "Numero de blocos " << numeroBlocos << endl
-		<< "Blocos por conjunto " << numeroBlocosConjunto << endl
-		<< "Politica de escrita " << politicaEscrita << endl
-		<< "Tempo de leitura (em ns) " << tempoLeitura << endl
-		<< "Tempo de escrita (em ns) " << tempoEscrita << endl
-		<< "Tempo de acesso (em ns) " << tempoAcesso << endl
-		<< "Politica de substituicao (0 - LRU , 1 - aleatoria) " << politicaSubstituicao << endl
+		<< "Parametros de entrada: " << std::endl
+		<< "Tamanho do bloco " << tamanhoBloco << std::endl
+		<< "Numero de blocos " << numeroBlocos << std::endl
+		<< "Blocos por conjunto " << numeroBlocosConjunto << std::endl
+		<< "Politica de escrita " << politicaEscrita << std::endl
+		<< "Tempo de leitura (em ns) " << tempoLeitura << std::endl
+		<< "Tempo de escrita (em ns) " << tempoEscrita << std::endl
+		<< "Tempo de acesso (em ns) " << tempoAcesso << std::endl
+		<< "Politica de substituicao (0 - LRU , 1 - aleatoria) " << politicaSubstituicao << std::endl
 
-		<< "Total de endereços: " << verificacoes << ". " << enderecosEscrita << " de escrita. " << (verificacoes - enderecosEscrita) << " de leitura." << endl
+		<< "Total de endereços: " << verificacoes << ". " << enderecosEscrita << " de escrita. " << (verificacoes - enderecosEscrita) << " de leitura." << std::endl
 
-		<< "Total de escritas da memoria principal: " << escritasMemoria << endl
-		<< "Total de leituras da memoria principal: " << leiturasMemoria << endl
+		<< "Total de escritas da memoria principal: " << escritasMemoria << std::endl
+		<< "Total de leituras da memoria principal: " << leiturasMemoria << std::endl
 
 		// Taxa de acerto (hit rate): especificar esta taxa por leitura, escrita e global (colocar ao lado a quantidade);
 
-		<< "Taxa de acerto (hit rate): " << taxaAcerto * 100 << "%" << endl
+		<< "Taxa de acerto (hit rate): " << taxaAcerto * 100 << "%" << std::endl
 
 		// Tempo médio de acesso da cache (em ns): utilizar a fórmula vista em aula;
 
-		<< "Tempo médio de acesso: " << taxaAcerto * tempoAcesso + (1 - taxaAcerto) * (tempoAcesso + tempoAcessoMem) << endl
+		<< "Tempo médio de acesso: " << taxaAcerto * tempoAcesso + (1 - taxaAcerto) * (tempoAcesso + tempoAcessoMem) << std::endl
 
-		//<< "Numero de acertos: " << acertos << endl
-		//<< "Numero de erros: " << erros << endl
+		//<< "Numero de acertos: " << acertos << std::endl
+		//<< "Numero de erros: " << erros << std::endl
 		;
 
 	return 0;
